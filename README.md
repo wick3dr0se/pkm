@@ -8,7 +8,7 @@ A package manager wrapper that simplifies usage
 ## Usage
 install specified package(s)
 ```bash
-pkg {-a|-add|install} <package>
+pkg {-a|add|install} <package>
 ```
 
 show information about specified package(s)
