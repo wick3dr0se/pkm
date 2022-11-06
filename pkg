@@ -1,0 +1,61 @@
+#!/bin/bash
+
+(( $# )) || { # if no args supplied, exit
+  printf '\e[1;31mE\e[0m: %s\n' "No arguments supplied"
+  exit 1
+}
+
+pkg_mgr() {
+  # set bin path
+  bin='/usr/bin'
+  [[ -d $bin ]] || bin='/data/data/com.termux/files/usr/bin'
+
+  # set package manager by *distro*
+  declare -gA distro args
+  distro[archLinux]='pacman'
+  distro[debian]='apt'
+
+  [[ -f $bin/yay ]] && distro[archLinux]='yay'
+
+  # check if package manager exist
+  pkgMgr="${distro[$1]}"
+  [[ -f $bin/$pkgMgr ]]
+}
+
+# set our first argument
+case $1 in
+  -a|install) a="$1" ;;
+  -i|show) i="$1" ;;
+  -l) l="$1" ;;
+  -la) la="$1" ;;
+  -s|search) s="$1" ;;
+  -d|delete|rmv|remove|uninstall) d="$1" ;;
+  -u|update) u="$1" ;;
+esac
+
+# set our arguments per package manager arguments
+if pkg_mgr archLinux ; then
+  args[${a:-add}]='-S'
+  args[${i:-info}]='-Si --color=auto'
+  args[${l:-list}]='-Qe --color=auto'
+  args[${la:-list-all}]='-Q --color=auto'
+  args[${s:-look}]='-Ss --color=auto'
+  args[${d:-del}]='-Runss'
+  args[${u:-sync}]='-Syu'
+elif pkg_mgr debian ; then
+  args[${a:-add}]='install'
+  args[${i:-info}]='show'
+  args[${l:-list}]='list --installed'
+  args[${la:-list-all}]='list'
+  args[${s:-look}]='search'
+  args[${d:-del}]='purge'
+  args[${u:-sync}]='update,-y full-upgrade,-y autoremove'
+fi
+
+# run each argument seperated by comma with package manager
+IFS=,
+for arg in ${args[$1]} ; do
+  IFS=' '
+  shift
+  $pkgMgr $arg $@
+done
