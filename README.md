@@ -6,6 +6,12 @@ A package manager wrapper that simplifies usage
 - apt (Debian)
 
 ## Usage
+update packages
+```bash
+pkg
+# or
+pkg {-u|update|sync}
+```
 install specified package(s)
 ```bash
 pkg {-a|add|install} <package>
@@ -34,9 +40,4 @@ pkg {-s|search|look} <package>
 uninstall specified package(s)
 ```bash
 pkg {-d|del|delete|rmv|remove|uninstall} <package>
-```
-
-update packages
-```bash
-pkg {-u|update|sync}
 ```
