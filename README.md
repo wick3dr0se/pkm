@@ -1,5 +1,5 @@
 # pkg
-A package manager wrapper that simplifies usage
+A stupid simple, unified package manager wrapper that simplifies arguments and usage
 
 ## Compatability
 - pacman->yay (Arch Linux)
