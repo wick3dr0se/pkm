@@ -6,10 +6,10 @@ pkg_mgr() {
   [[ -d $bin ]] || bin='/data/data/com.termux/files/usr/bin'
 
   # set package manager by *distro*
-  declare -gA distro args
-  distro[archLinux]='pacman'
+  declare -gA args distro
+  distro[arch]='pacman'
   distro[debian]='apt'
-  [[ -f $bin/yay ]] && distro[archLinux]='yay'
+  [[ -f $bin/yay ]] && distro[arch]='yay'
 
   # check if package manager exist
   pkgMgr="${distro[$1]}"
@@ -28,7 +28,7 @@ case $1 in
 esac
 
 # set package manager arguments per our argumentss
-if pkg_mgr archLinux ; then
+if pkg_mgr arch ; then
   args=( 
     [${a:-add}]='-S'
     [${i:-info}]='-Si --color=auto'
@@ -53,9 +53,6 @@ elif pkg_mgr debian ; then
 fi
 
 # run each argument with package manager
-IFS=$'\n'
-for arg in ${args[${1:-sync}]} ; do
-  IFS=' '
-  shift
-  $pkgMgr $arg $@
-done
+while IFS=$'\n' read -r arg ; do
+  $pkgMgr $arg ${@/$1}
+done <<< ${args[${1:-sync}]}
