@@ -38,7 +38,7 @@ if pkg_mgr pacman ; then
     [${u:-sync}]='-Syu'
   ) # args
 elif pkg_mgr apt ; then
-  args=( 
+  args=(  
     [${a:-add}]='install'
     [${i:-info}]='show'
     [${l:-list}]='list --installed'
@@ -50,13 +50,22 @@ elif pkg_mgr apt ; then
       -y autoremove' # sync
   ) # args
 elif pkg_mgr rpm ; then
-  args=(
+  args=( 
     [${a:-add}]='-ih'
     [${i:-info}]='-qi'
     [${l:-list}]='-qa'
     [${s:-look}]='-q'
     [${d:-del}]='-eh'
     [${u:-sync}]='-Uh'
+  )
+elif pkg_mgr winget ; then
+  args=( 
+    [${a:-add}]='install'
+    [${i:-info}]='show'
+    [${l:-list}]='list --name'
+    [${s:-look}]='search -q --name'
+    [${d:-del}]='uninstall'
+    [${u:-sync}]='upgrade --all'
   )
 fi
 

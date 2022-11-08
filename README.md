@@ -5,6 +5,7 @@ A stupid simple, lightweight, multi-package manager wrapper that simplifies argu
 - pacman->AUR (Arch Linux)
 - apt (Debian)
 - rpm (RHEL)
+- winget (Windows)
 
 ## Usage
 update packages
