@@ -3,7 +3,10 @@
 pkg_mgr() {
   # set bin path
   bin='/usr/bin'
-  [[ -d $bin ]] || bin='/data/data/com.termux/files/usr/bin'
+  [[ -d $bin ]] || {
+    bin='C:/Program Files'
+    [[ -d $bin ]] || bin='/data/data/com.termux/files/usr/bin'
+  }
 
   # set package manager by *distro*
   declare -gA args distro
