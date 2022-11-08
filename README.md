@@ -8,12 +8,17 @@ A stupid simple, lightweight, multi-package manager wrapper that simplifies argu
 - winget (Windows)
 
 ## Usage
+get help from your package manager
+```bash
+pkg {-?|-h|--help|help}
+```
 update packages
 ```bash
 pkg
 # or
 pkg {-u|update|sync}
 ```
+
 install specified package(s)
 ```bash
 pkg {-a|add|install} <package>

@@ -18,8 +18,17 @@ pkg_mgr() {
   [[ -f $bin/$pkgMgr ]]
 } # pkg_mgr
 
-# set our first arguments
+# set our arguments
+h='help'
+a='add'
+i='info'
+l='list'
+la='list-all'
+s='look'
+d='del'
+u='sync'
 case $1 in
+  -\?|-h|--help) h="$1" ;;
   -a|install) a="$1" ;;
   -i|show) i="$1" ;;
   -l) l="$1" ;;
@@ -32,43 +41,47 @@ esac
 # set package manager arguments per our argumentss
 if pkg_mgr pacman ; then
   args=( 
-    [${a:-add}]='-S'
-    [${i:-info}]='-Si --color=auto'
-    [${l:-list}]='-Qe --color=auto'
-    [${la:-list-all}]='-Q --color=auto'
-    [${s:-look}]='-Ss --color=auto'
-    [${d:-del}]='-Runss'
-    [${u:-sync}]='-Syu'
+    [$h]='-h'
+    [$a]='-S'
+    [$i]='-Si --color=auto'
+    [$l]='-Qe --color=auto'
+    [$la]='-Q --color=auto'
+    [$s]='-Ss --color=auto'
+    [$d]='-Runss'
+    [$u]='-Syu'
   ) # args
 elif pkg_mgr apt ; then
-  args=(  
-    [${a:-add}]='install'
-    [${i:-info}]='show'
-    [${l:-list}]='list --installed'
-    [${la:-list-all}]='list'
-    [${s:-look}]='search'
-    [${d:-del}]='purge'
-    [${u:-sync}]='update
+  args=( 
+    [$h]='-h'
+    [$a]='install'
+    [$i]='show'
+    [$l]='list --installed'
+    [$la]='list'
+    [$s]='search'
+    [$d]='purge'
+    [$u]='update
       -y full-upgrade
       -y autoremove' # sync
   ) # args
 elif pkg_mgr rpm ; then
   args=( 
-    [${a:-add}]='-ih'
-    [${i:-info}]='-qi'
-    [${l:-list}]='-qa'
-    [${s:-look}]='-q'
-    [${d:-del}]='-eh'
-    [${u:-sync}]='-Uh'
+    [$h]='--help'
+    [$a]='-ih'
+    [$i]='-qi'
+    [$l]='-qa'
+    [$s]='-q'
+    [$d]='-eh'
+    [$u]='-Uh'
   )
 elif pkg_mgr winget ; then
   args=( 
-    [${a:-add}]='install'
-    [${i:-info}]='show'
-    [${l:-list}]='list --name'
-    [${s:-look}]='search -q --name'
-    [${d:-del}]='uninstall'
-    [${u:-sync}]='upgrade --all'
+    [$h]='-?'
+    [$a]='install'
+    [$i]='show'
+    [$l]='list --name'
+    [$s]='search -q --name'
+    [$d]='uninstall'
+    [$u]='upgrade --all'
   )
 fi
 
