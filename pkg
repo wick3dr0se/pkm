@@ -7,12 +7,11 @@ pkg_mgr() {
 
   # set package manager by *distro*
   declare -gA args distro
-  distro[arch]='pacman'
-  distro[debian]='apt'
-  [[ -f $bin/yay ]] && distro[arch]='yay'
+  distro[pacman]='pacman'
+  [[ -f $bin/yay ]] && distro[pacman]='yay'
 
   # check if package manager exist
-  pkgMgr="${distro[$1]}"
+  pkgMgr="${distro[$1]:-$1}"
   [[ -f $bin/$pkgMgr ]]
 } # pkg_mgr
 
@@ -28,7 +27,7 @@ case $1 in
 esac
 
 # set package manager arguments per our argumentss
-if pkg_mgr arch ; then
+if pkg_mgr pacman ; then
   args=( 
     [${a:-add}]='-S'
     [${i:-info}]='-Si --color=auto'
@@ -38,7 +37,7 @@ if pkg_mgr arch ; then
     [${d:-del}]='-Runss'
     [${u:-sync}]='-Syu'
   ) # args
-elif pkg_mgr debian ; then
+elif pkg_mgr apt ; then
   args=( 
     [${a:-add}]='install'
     [${i:-info}]='show'
@@ -50,6 +49,15 @@ elif pkg_mgr debian ; then
       -y full-upgrade
       -y autoremove' # sync
   ) # args
+elif pkg_mgr rpm ; then
+  args=(
+    [${a:-add}]='-ih'
+    [${i:-info}]='-qi'
+    [${l:-list}]='-qa'
+    [${s:-look}]='-q'
+    [${d:-del}]='-eh'
+    [${u:-sync}]='-Uh'
+  )
 fi
 
 # run each argument with package manager

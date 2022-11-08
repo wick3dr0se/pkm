@@ -1,9 +1,10 @@
 # pkg
-A stupid simple, unified package manager wrapper that simplifies arguments and usage
+A stupid simple, lightweight, multi-package manager wrapper that simplifies arguments and usage
 
 ## Compatability
-- pacman->yay (Arch Linux)
+- pacman->AUR (Arch Linux)
 - apt (Debian)
+- rpm (RHEL)
 
 ## Usage
 update packages
