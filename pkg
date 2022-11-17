@@ -68,7 +68,16 @@ elif pkg_mgr winget ; then
   set_arg "$l" 'list --name'
   set_arg "$s" 'search -q --name'
   set_arg "$u" 'upgrade --all'
+elif pkg_mgr brew ; then
+  set_arg "$h" 'help'
+  set_arg "$a" 'install'
+  set_arg "$d" 'uninstall'
+  set_arg "$i" 'info'
+  set_arg "$l" 'list'
+  set_arg "$s" 'search'
+  set_arg "$u" 'upgrade'
 fi
+
 
 # run each argument with package manager
 while IFS=$'\n' read -r arg ; do

@@ -6,6 +6,7 @@ A stupid simple, lightweight, multi-package manager wrapper that simplifies argu
 - apt (Debian)
 - rpm (RHEL)
 - winget (Windows)
+- brew (MacOS)
 
 ## Usage
 get help from your package manager
