@@ -1,6 +1,6 @@
 <div align="center">
 <h1>pkm</h1>
-<p>A super minimal TUI package manager written in BASH v4.2+</p>
+<p>A super minimal TUI package manager wrapper written in BASH v4.2+</p>
 <p><code>pkm</code> is a new project and so far just supports the aptitude package manager</p>
 
 ![pkm gif](./pkm.gif)
