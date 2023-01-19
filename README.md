@@ -1,51 +1,25 @@
-# pkg
-A stupid simple, lightweight, multi-package manager wrapper that simplifies arguments and usage
+<div align="center">
+<h1>pkm</h1>
+<p>A super minimal TUI package manager written in BASH v4.2+</p>
+<p><code>pkm</code> is a new project and so far just supports the aptitude package manager</p>
 
-## Compatability
-- pacman->AUR (Arch Linux)
-- apt (Debian)
-- rpm (RHEL)
-- winget (Windows)
-- brew (MacOS)
+![pkm gif](./pkm.gif)
+</div>
+
+## Install
+```bash
+git clone https://github.com/wick3dr0se/pkm&& cd pkm
+```
 
 ## Usage
-get help from your package manager
 ```bash
-pkg {-?|-h|--help|help}
-```
-update packages
-```bash
-pkg
-# or
-pkg {-u|update|sync}
+bash pkm
 ```
 
-install specified package(s)
-```bash
-pkg {-a|add|install} <package>
-```
+## Controls
+H, ←   ...   Back  
+J, ↓   ...   Move down  
+K, ↑   ...   Move up  
+L, →   ...   Do action
 
-show information about specified package(s)
-```bash
-pkg {-i|info|show} <package>
-```
-
-list installed packages
-```bash
-pkg {-l|list}
-```
-
-list database packages
-```bash
-pkg {-la|list-all}
-```
-
-search for specified package(s) in database
-```bash
-pkg {-s|search|look} <package>
-```
-
-uninstall specified package(s)
-```bash
-pkg {-d|del|delete|rmv|remove|uninstall} <package>
-```
+Q   ...   Quit

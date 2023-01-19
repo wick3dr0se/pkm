@@ -1,0 +1,257 @@
+#!/bin/bash
+# shellcheck disable=SC2034
+# SC2034 -- argCount appears unused. Verify u... // namerefs
+
+set -eEuo pipefail
+
+shopt -s nocasematch
+
+term_size()
+{
+shopt -s checkwinsize; (:;:)
+((rows=LINES-1))
+
+printf '\e[?1049h\e[?7l\e[?25l'
+}
+
+end(){ printf '\e[?1049l\e[?7h\e[?25h'; exit;}
+
+clear_screen(){ printf '\e[2J\e[%dH' "$rows"; }
+
+reinit(){ unset i hist hover; clear_screen; }
+
+reverse_array(){
+local -n foo=$1
+
+IFS=$'\n'
+shopt -s extdebug
+bar()( printf '%s\n' "${BASH_ARGV[@]}" )
+foo=($(bar "${foo[@]}"))&& unset "foo[-1]"
+shopt -u extdebug
+}
+
+read_keys()
+{
+read -rsn1
+[[ $REPLY == $'\e' ]]&& read -rsn2
+key="${REPLY-}"
+}
+
+scroll()
+{
+local -n foo=$1 fooInit=$2 fooCount=$3
+if (( fooCount > rows )); then
+  if (( cursor < rows&& cursor < 1 )); then
+    cursor="$rows"
+    foo=("${foo[@]:0:${#foo[@]}-rows}")
+    ((fooLast=${#foo[@]}-rows))
+
+    reinit
+    printf '%s\n' "${foo[@]: $fooLast}"
+  elif (( cursor > rows )); then
+    cursor=1
+    foo=("${fooInit[@]:0:${#foo[@]}+rows}")
+    ((fooLast=${#foo[@]}-rows))
+
+    reinit
+    printf '%s\n' "${foo[@]: $fooLast}"
+  fi
+else
+  ((cursorMin=LINES-fooCount))
+  if (( cursor > rows )); then
+    cursor="$cursorMin"
+  elif (( cursor < cursorMin )); then
+    cursor="$rows"
+  fi
+fi
+}
+
+hover()
+{
+hover="$1"
+printf '\e[%dH\e[42m%s\e[m' "$cursor" "$hover"
+(( $2 == 1 ))||{
+  hist+=("${cursor}H\e[49m${hover}")
+  (( ${i:=0} ))&&{
+    printf '\e[%b\e[m' "${hist[0]}"
+    hist=("${hist[@]:1}")
+  }|| i=1
+}
+}
+
+hud()
+{
+printf '\e[%dH\e[44mpkm\e[m %s' "$LINES" "${1-}"
+}
+
+simp_keymap()
+{
+for((;;)){
+  hud '[←]back'
+
+  read_keys
+  [[ $key =~ H|\[D ]]&&{
+    clear_screen
+      printf '%s\n' "${args[@]}"
+      break
+  }
+}
+}
+
+apt_query()
+{
+for((;;)){
+  hud "[←]back [→]info | results:$packageCount"
+  scroll packages packagesInit packageCount
+
+  hover "${packages[$cursor-$LINES]%% - *}" "$packageCount"
+
+  read_keys
+  case $key in
+    H|\[D) reinit; printf '%s\n' "${args[@]}"; break;;
+    J|\[B) ((cursor++));;
+    K|\[A) ((cursor--));;
+    L|\[C) clear_screen
+      apt-cache show "$hover"
+
+      for((;;)){
+        hud '[←]back [→]install'
+
+        read_keys
+        case $key in
+          H|\[D) reinit
+            printf '%s\n' "${packages[@]}"
+            break
+          ;;
+          L|\[C) apt-get install "$hover" 2>/dev/null||{
+            clear_screen
+            printf '%s\n' "${args[@]}"
+            continue
+          }
+        esac
+      }
+    ;;
+  esac
+}
+}
+
+apt_list()
+{
+for((;;)){
+  hud "[←]back [→]info | installed:$installedCount"
+  scroll installed installedInit installedCount
+
+  hover "${installed[$cursor-$LINES]%%/*}" "$installedCount"
+
+  read_keys
+  case $key in
+    H|\[D) reinit
+      printf '%s\n' "${args[@]}"
+      break
+    ;;
+    J|\[B) ((cursor++));;
+    K|\[A) ((cursor--));;
+    L|\[C) clear_screen
+      apt-cache show "$hover"
+
+      for((;;)){
+        hud '[←]back [→]delete'
+
+        read_keys
+        case $key in
+          H|\[D) reinit
+            printf '%s\n' "${installed[@]}"
+            break
+          ;;
+          L|\[C) apt-get purge "$hover";;
+        esac
+      }
+    ;;
+  esac
+}
+}
+
+_aptitude()
+{
+arg="$1"; shift
+case $arg in
+  sync/update) for _ in autoremove clean update upgrade; do
+    apt "$_"
+  done
+  
+    simp_keymap
+  ;;
+  info) hud; read -rep 'Enter a package name: '
+    clear_screen
+    apt-cache show "${REPLY-}"
+
+    simp_keymap
+  ;;
+  query/install) hud; read -rep 'Enter a search pattern: '
+    mapfile -t packages < <(apt-cache search "${REPLY-}")
+    reverse_array packages
+    packagesInit=("${packages[@]}") packageCount="${#packages[@]}"
+
+    cursor="$rows"
+    reinit
+    printf '%s\n' "${packages[@]}"
+
+    apt_query
+  ;;
+  install) hud; read -rep 'Enter a package name: '
+    clear_screen
+    apt-get install "${REPLY-}" 2>/dev/null|| :
+
+    simp_keymap
+  ;;
+  list\ installed/delete) clear_screen
+    mapfile -t installed < <(apt list --installed)
+    reverse_array installed; unset "installed[-1]"
+    installedInit=("${installed[@]}") installedCount="${#installed[@]}"
+
+    reinit
+    printf '%s\n' "${installed[@]}"
+
+    apt_list
+  ;;
+  delete) hud; read -rep 'Enter a package name: '
+    clear_screen
+    apt-get purge "${REPLY-}" 2>/dev/null|| :
+
+    simp_keymap
+  ;;
+esac
+}
+
+trap end 2
+
+term_size
+cursor="$rows" argCount=6
+
+args=(
+  'Sync/Update'
+  'Info'
+  'Query/Install'
+  'Install'
+  'List Installed/Delete'
+  'Delete'
+)
+clear_screen
+printf '%s\n' "${args[@]}"
+
+for((;;)){
+  hud '[→]exec [Q]uit'
+
+  scroll args args argCount
+  hover "${args[$cursor-$LINES]}" "$argCount"
+
+  read_keys
+  case $key in
+    Q) end;;
+    J|\[B) ((cursor++));;
+    K|\[A) ((cursor--));;
+    L|\[C)
+      _aptitude "$hover"
+    ;;
+  esac
+}
