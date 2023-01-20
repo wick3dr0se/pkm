@@ -41,20 +41,19 @@ scroll()
 {
 local -n foo=$1 fooInit=$2 fooCount=$3
 if (( fooCount > rows )); then
+  (( rows-cursor == ${#foo[@]} ))&& cursor="$rows"
   if (( cursor < rows&& cursor < 1 )); then
     cursor="$rows"
     foo=("${foo[@]:0:${#foo[@]}-rows}")
-    ((fooLast=${#foo[@]}-rows))
 
     reinit
-    printf '%s\n' "${foo[@]: $fooLast}"
+    printf '%s\n' "${foo[@]}"
   elif (( cursor > rows )); then
     cursor=1
     foo=("${fooInit[@]:0:${#foo[@]}+rows}")
-    ((fooLast=${#foo[@]}-rows))
 
     reinit
-    printf '%s\n' "${foo[@]: $fooLast}"
+    printf '%s\n' "${foo[@]}"
   fi
 else
   ((cursorMin=LINES-fooCount))
@@ -103,6 +102,12 @@ apt_query()
 for((;;)){
   hud "[←]back [→]info | results:$packageCount"
   scroll packages packagesInit packageCount
+
+  (( packageCount ))||{
+    clear_screen
+    printf '%s\n' "${args[@]}"
+    break
+  }
 
   hover "${packages[$cursor-$LINES]%% - *}" "$packageCount"
 
@@ -171,24 +176,25 @@ for((;;)){
 }
 }
 
-_aptitude()
+_apt()
 {
 arg="$1"; shift
 case $arg in
-  sync/update) for _ in autoremove clean update upgrade; do
-    apt "$_"
-  done
+  sync/update) clear_screen
+    for _ in autoremove clean update upgrade; do
+      apt "$_"
+    done
   
     simp_keymap
   ;;
   info) hud; read -rep 'Enter a package name: '
     clear_screen
-    apt-cache show "${REPLY-}"
+    apt-cache show "${REPLY-}"|| :
 
     simp_keymap
   ;;
   query/install) hud; read -rep 'Enter a search pattern: '
-    mapfile -t packages < <(apt-cache search "${REPLY-}")
+    mapfile -t packages < <(apt-cache search "${REPLY-}" 2>/dev/null)
     reverse_array packages
     packagesInit=("${packages[@]}") packageCount="${#packages[@]}"
 
@@ -205,7 +211,7 @@ case $arg in
     simp_keymap
   ;;
   list\ installed/delete) clear_screen
-    mapfile -t installed < <(apt list --installed)
+    mapfile -t installed < <(apt list --installed 2>/dev/null)
     reverse_array installed; unset "installed[-1]"
     installedInit=("${installed[@]}") installedCount="${#installed[@]}"
 
@@ -251,7 +257,7 @@ for((;;)){
     J|\[B) ((cursor++));;
     K|\[A) ((cursor--));;
     L|\[C)
-      _aptitude "$hover"
+      _apt "$hover"
     ;;
   esac
 }
