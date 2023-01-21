@@ -1,8 +1,6 @@
-#!/bin/bash
-# shellcheck disable=SC2034
-# SC2034 -- argCount appears unused. Verify u... // namerefs
+#!/usr/bin/env bash
 
-set -eEuo pipefail
+set -eEuo pipefail ignoreeof
 
 shopt -s nocasematch
 
@@ -20,13 +18,14 @@ clear_screen(){ printf '\e[2J\e[%dH' "$rows"; }
 
 reinit(){ unset i hist hover; clear_screen; }
 
-reverse_array(){
+reverse_array()
+{
 local -n foo=$1
 
-IFS=$'\n'
 shopt -s extdebug
+IFS=$'\n'
 bar()( printf '%s\n' "${BASH_ARGV[@]}" )
-foo=($(bar "${foo[@]}"))&& unset "foo[-1]"
+foo=($(bar "${foo[@]}")); unset "foo[-1]"
 shopt -u extdebug
 }
 
@@ -146,7 +145,7 @@ for((;;)){
   hud "[←]back [→]info | installed:$installedCount"
   scroll installed installedInit installedCount
 
-  hover "${installed[$cursor-$LINES]%%/*}" "$installedCount"
+  hover "${installed[$cursor-$LINES]}" "$installedCount"
 
   read_keys
   case $key in
@@ -211,7 +210,7 @@ case $arg in
     simp_keymap
   ;;
   list\ installed/delete) clear_screen
-    mapfile -t installed < <(apt list --installed 2>/dev/null)
+    mapfile -t installed < <(apt-mark showinstall)
     reverse_array installed; unset "installed[-1]"
     installedInit=("${installed[@]}") installedCount="${#installed[@]}"
 
