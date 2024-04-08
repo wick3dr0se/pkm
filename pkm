@@ -1,0 +1,35 @@
+#!/bin/bash
+
+. ./src/common.sh
+
+trap 'exit' INT
+trap deinit_term EXIT
+
+if hash pacman; then
+    . ./src/pacman.sh
+elif hash apt; then
+    . ./src/apt.sh
+fi
+
+opers=(
+    'Sync/Update'
+    'Query/Info/Install'
+    'List Installed/Delete'
+)
+
+init_term
+draw "${opers[@]}"
+
+for((;;)) {
+    sbar '[>] do'
+    hover_interface opers
+
+    [[ $REPLY =~ '[C'|[lLdD] ]]&& {
+        case "${opers[cursor-LINES]}" in
+            "${opers[0]}") _update;;
+            "${opers[1]}") query_info_install;;
+        esac
+        
+        draw "${opers[@]}"
+    }
+}
