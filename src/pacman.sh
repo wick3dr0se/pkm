@@ -1,32 +1,35 @@
 #!/bin/bash
 
-_delete() {
-    [[ $1 ]]|| {
-        _sbar 'Delete: '
+_pacman() {
+    printf '\e[2J\e[H\e[?25h'
 
-        read -r pkg
-    }
-
-    printf '\e[2J\e[H'
-    
-    sudo pacman -Runs "${1:-$pkg}"
+    if (( $3 )); then
+        sudo pacman "$1" "$2"
+    else
+        pacman "$1" "$2"
+    fi
 
     printf '\e[?25l'
+}
 
+_delete() {
+    [[ $1 ]]|| _ibar 'Delete: ' pkg
+    _pacman -Runs "${1:-$pkg}" 1
     base_keymap
 }
 
 list_installed() {
-    printf '\e[2J'
-
+    local installed installedInit
+    
     mapfile -t installed < <(pacman -Qqe)
     installedInit=("${installed[@]}")
     
+    printf '\e[2J'
+
     _draw "${installed[@]}"
 
     for((;;)) {
-        _sbar '[<] back [>] delete'
-
+        _ibar '[<] back [>] delete'
         hover_interface installed "${installedInit[@]}"
 
         case $REPLY in
@@ -40,50 +43,31 @@ list_installed() {
 }
 
 _install() {
-    [[ $1 ]]|| {
-        _sbar 'Install: '
+    local pkg
 
-        read -r pkg
-    }
-
-    printf '\e[2J\e[H\e[?25h'
-        
-    sudo pacman -S "${1:-$pkg}" && base_keymap
-
-    printf '\e[?25l'
-
+    [[ $1 ]]|| _ibar 'Install: ' pkg
+    _pacman -S "${1:-$pkg}" 1
     base_keymap
-
     _draw "${queries[@]-}"
 }
 
 
 _info() {
-    [[ $1 ]]|| {
-        _sbar 'Info: '
+    local pkg
 
-        read -r pkg
-    }
-
-    printf '\e[2J\e[H\e[?25h'
-
-    pacman -Si "${1:-$pkg}" && base_keymap
-
-    printf '\e[?25l'
-
-    _draw "${queries[@]-}"
+    [[ $1 ]]|| _ibar 'Info: ' pkg
+    _pacman -Si "${1:-$pkg}"
+    base_keymap
 }
 
 _query() {
-    local n=0 query queries queriesInit line pkgName pkgDesc
+    local n=0 pkg queries queriesInit line pkgName pkgDesc
 
-    printf '\e[?25h'
-    _sbar 'Query: '
-        
-    read -r query
-    printf '\e[T\e[?25l'
+    _ibar 'Query: ' pkg
 
-    [[ $query ]]|| return 1
+    printf '\e[T'
+
+    [[ $pkg ]]|| return 1
 
     while read -r line; do
          if [[ $line =~ / ]]; then
@@ -101,14 +85,13 @@ _query() {
         else
             n=1
         fi
-    done < <(pacman -Ss "$query")
+    done < <(pacman -Ss "$pkg")
     queriesInit=("${queries[@]}")
 
     _draw "${queries[@]}"
 
     for((;;)) {
-        _sbar '[<] back [>] install'
-
+        _ibar '[<] back [>] install'
         hover_interface queries "${queriesInit[@]}"
 
         case $REPLY in
@@ -119,16 +102,10 @@ _query() {
 }
 
 _update() {
-    printf '\e[2J\e[H\e[?25h'
-
-    sudo pacman -Syu
-
-    printf '\e[?25l'
+    _pacman -Syu '' 1
 
     for((;;)) {
-        _sbar '[*] continue'
-        
-        read_keys
+        _ibar '[*] continue' ''; read -rn1
         
         return
     }

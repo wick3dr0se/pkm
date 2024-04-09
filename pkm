@@ -24,7 +24,7 @@ _update
 _draw "${opers[@]}"
 
 for((;;)) {
-    _sbar '[>] do'
+    _ibar '[>] do'
     hover_interface opers
 
     [[ $REPLY =~ ^''$|^'[C'$|^[lLdD]$ ]]&& {

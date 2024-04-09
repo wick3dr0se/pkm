@@ -26,7 +26,7 @@ hover_interface() {
     local -n foo=$1
     local fooInit=("$@") fooCnt="${#foo[@]}"
     
-    printf '\e[%dH\e[32m%s\e[m' "$cursor" "${foo[cursor-LINES]%:*}"
+    printf '\e[%dH\e[30;42m%s\e[m' "$cursor" "${foo[cursor-LINES]%:*}"
     
     cursorHist+=("$cursor")
     if (( ${i:=0} )); then
@@ -67,11 +67,21 @@ hover_interface() {
 
 base_keymap() {
     for((;;)) {
-        _sbar '[<] back'
+        _ibar '[<] back'
 
         read_keys
         [[ $REPLY =~ ^'[D'$|^[hHaA]$ ]]&& return
     }
 }
 
-_sbar() { printf '\e[%dHPKM %s' "$LINES" "$1"; }
+_ibar() {
+    printf '\e[%dHPKM %s' "$LINES" "$1"
+    
+    [[ $2 ]] && {
+        printf '\e[?25h'
+
+        read -r "$2"
+
+        printf '\e[?25l'
+    }
+}
