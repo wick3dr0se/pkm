@@ -12,24 +12,30 @@ elif hash apt; then
 fi
 
 opers=(
-    'Sync/Update'
-    'Query/Info/Install'
-    'List Installed/Delete'
+    'Info'
+    'Query'
+    'Install'
+    'List Installed'
+    'Delete'
 )
 
 init_term
-draw "${opers[@]}"
+_update
+_draw "${opers[@]}"
 
 for((;;)) {
-    sbar '[>] do'
+    _sbar '[>] do'
     hover_interface opers
 
-    [[ $REPLY =~ '[C'|[lLdD] ]]&& {
-        case "${opers[cursor-LINES]}" in
-            "${opers[0]}") _update;;
-            "${opers[1]}") query_info_install;;
+    [[ $REPLY =~ ^''$|^'[C'$|^[lLdD]$ ]]&& {
+        case ${opers[cursor-LINES]} in
+            "${opers[0]}") _info;;
+            "${opers[1]}") _query;;
+            "${opers[2]}") _install;;
+            "${opers[3]}") list_installed;;
+            "${opers[4]}") _delete;;
         esac
         
-        draw "${opers[@]}"
+        _draw "${opers[@]}"
     }
 }

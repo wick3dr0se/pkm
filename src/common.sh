@@ -14,15 +14,17 @@ deinit_term() {
 
 read_keys() { read -rsn1; [[ $REPLY == $'\e' ]] && read -rsn2; }
 
-draw() {
+_draw() {
+    unset i cursorHist
     cursor="$rows"
+    
     printf '\e[2J\e[%dH' "$LINES"
     printf '%s\n' "$@"
 }
 
 hover_interface() {
     local -n foo=$1
-    local fooInit=("${@}") fooCnt="${#foo[@]}"
+    local fooInit=("$@") fooCnt="${#foo[@]}"
     
     printf '\e[%dH\e[32m%s\e[m' "$cursor" "${foo[cursor-LINES]%:*}"
     
@@ -45,12 +47,14 @@ hover_interface() {
         (( cursor < LINES-fooCnt ))&& cursor="$rows"
 
         if (( cursor > rows )); then
+            fooInit=("${fooInit[@]:1}")
             foo=("${fooInit[@]:0:${#foo[@]}+rows}")
-            draw "${foo[@]}"
+            _draw "${foo[@]}"
             cursor=1
         elif (( cursor < 1 )); then
+            fooInit=("${fooInit[@]:1}")
             foo=("${foo[@]:0:${#foo[@]}-rows}")
-            draw "${foo[@]}"
+            _draw "${foo[@]}"
         fi
     else
         if (( cursor > rows )); then
@@ -61,13 +65,13 @@ hover_interface() {
     fi
 }
 
-_keymap() {
+base_keymap() {
     for((;;)) {
-        sbar '[<] back'
+        _sbar '[<] back'
 
         read_keys
-        [[ $REPLY =~ '[D'|[hHaA] ]]&& return
+        [[ $REPLY =~ ^'[D'$|^[hHaA]$ ]]&& return
     }
 }
 
-sbar() { printf '\e[%dHPKM %s' "$LINES" "$1"; }
+_sbar() { printf '\e[%dHPKM %s' "$LINES" "$1"; }

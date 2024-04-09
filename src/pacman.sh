@@ -1,16 +1,89 @@
 #!/bin/bash
 
-. ./common.sh
+_delete() {
+    [[ $1 ]]|| {
+        _sbar 'Delete: '
+
+        read -r pkg
+    }
+
+    printf '\e[2J\e[H'
+    
+    sudo pacman -Runs "${1:-$pkg}"
+
+    printf '\e[?25l'
+
+    base_keymap
+}
+
+list_installed() {
+    printf '\e[2J'
+
+    mapfile -t installed < <(pacman -Qqe)
+    installedInit=("${installed[@]}")
+    
+    _draw "${installed[@]}"
+
+    for((;;)) {
+        _sbar '[<] back [>] delete'
+
+        hover_interface installed "${installedInit[@]}"
+
+        case $REPLY in
+            '[D'|[hHaA]) return 1;;
+            ''|'[C'|[lLdD])
+                _delete "${installed[cursor-LINES]}"
+                _draw "${installed[@]}"
+            ;;
+        esac
+    }
+}
+
+_install() {
+    [[ $1 ]]|| {
+        _sbar 'Install: '
+
+        read -r pkg
+    }
+
+    printf '\e[2J\e[H\e[?25h'
+        
+    sudo pacman -S "${1:-$pkg}" && base_keymap
+
+    printf '\e[?25l'
+
+    base_keymap
+
+    _draw "${queries[@]-}"
+}
+
+
+_info() {
+    [[ $1 ]]|| {
+        _sbar 'Info: '
+
+        read -r pkg
+    }
+
+    printf '\e[2J\e[H\e[?25h'
+
+    pacman -Si "${1:-$pkg}" && base_keymap
+
+    printf '\e[?25l'
+
+    _draw "${queries[@]-}"
+}
 
 _query() {
-    local n=0 pkg line pkgName pkgDesc
+    local n=0 query queries queriesInit line pkgName pkgDesc
 
-    until [[ $pkg ]]; do
-        sbar 'Query: '
+    printf '\e[?25h'
+    _sbar 'Query: '
         
-        read -r pkg
-        printf '\e[T'
-    done
+    read -r query
+    printf '\e[T\e[?25l'
+
+    [[ $query ]]|| return 1
 
     while read -r line; do
          if [[ $line =~ / ]]; then
@@ -24,63 +97,25 @@ _query() {
         fi
 
         if (( n )); then
-            n=0 pkgs+=("$pkgName: $pkgDesc")
+            n=0 queries+=("$pkgName: $pkgDesc")
         else
             n=1
         fi
-    done < <(pacman -Ss "$pkg")
-    pkgsInit=("${pkgs[@]}")
+    done < <(pacman -Ss "$query")
+    queriesInit=("${queries[@]}")
 
-    draw "${pkgs[@]}"
-}
-
-_info() {
-    printf '\e[2J\r'
-                
-    pacman -Si "${pkgs[cursor-LINES]%:*}"
-
-    printf '\e[?25l'
-}
-
-_install() {
-    printf '\e[2J\e[H\e[?25h'
-    
-    sudo pacman -Ss "${pkgs[cursor-LINES]%:*}"
-    
-    printf '\e[?25l'
-}
-
-info_install() {
-    _info
+    _draw "${queries[@]}"
 
     for((;;)) {
-        sbar '[<] back [>] install'
-        
-        read_keys
-        case $REPLY in
-            '[D'|[hHaA]) break;;
-            '[C'|[lLdD]) _install;;
-        esac
-    }
+        _sbar '[<] back [>] install'
 
-    draw "${pkgs[@]}"
-}
-
-query_info_install() {
-    _query
-
-    for((;;)) {
-        sbar '[<] back [>] info'
-
-        hover_interface pkgs "${pkgsInit[@]}"
+        hover_interface queries "${queriesInit[@]}"
 
         case $REPLY in
-            '[D'|[hHaA]) return ;;
-            '[C'|[lLdD]) info_install;;
+            '[D'|[hHaA]) return 1;;
+            ''|'[C'|[lLdD]) _install "${queries[cursor-LINES]}";;
         esac
     }
-
-    draw
 }
 
 _update() {
@@ -90,5 +125,11 @@ _update() {
 
     printf '\e[?25l'
 
-    _keymap
+    for((;;)) {
+        _sbar '[*] continue'
+        
+        read_keys
+        
+        return
+    }
 }
