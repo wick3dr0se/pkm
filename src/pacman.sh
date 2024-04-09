@@ -12,12 +12,6 @@ _pacman() {
     printf '\e[?25l'
 }
 
-_delete() {
-    [[ $1 ]]|| _ibar 'Delete: ' pkg
-    _pacman -Runs "${1:-$pkg}" 1
-    base_keymap
-}
-
 list_installed() {
     local installed installedInit
     
@@ -42,6 +36,12 @@ list_installed() {
     }
 }
 
+_delete() {
+    [[ $1 ]]|| _ibar 'Delete: ' pkg
+    _pacman -Runs "${1:-$pkg}" 1
+    base_keymap
+}
+
 _install() {
     local pkg
 
@@ -55,7 +55,7 @@ _install() {
 _info() {
     local pkg
 
-    [[ $1 ]]|| _ibar 'Info: ' pkg
+    [[ $1 ]] || _ibar 'Info: ' pkg
     _pacman -Si "${1:-$pkg}"
     base_keymap
 }
@@ -64,14 +64,11 @@ _query() {
     local n=0 pkg queries queriesInit line pkgName pkgDesc
 
     _ibar 'Query: ' pkg
-
-    printf '\e[T'
-
-    [[ $pkg ]]|| return 1
+    [[ $pkg ]] || return 1
 
     while read -r line; do
          if [[ $line =~ / ]]; then
-            [[ $line =~ (.*)/(.*)\ (.*[0-9]) ]]&& {
+            [[ $line =~ (.*)/(.*)\ (.*[0-9]) ]] && {
                 #pkgRepo="${BASH_REMATCH[1]}"
                 pkgName="${BASH_REMATCH[2]}"
                 #pkgVer="${BASH_REMATCH[3]}"

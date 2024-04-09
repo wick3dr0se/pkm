@@ -15,8 +15,8 @@ opers=(
     'Info'
     'Query'
     'Install'
-    'List Installed'
     'Delete'
+    'List Installed'
 )
 
 init_term
@@ -32,8 +32,8 @@ for((;;)) {
             "${opers[0]}") _info;;
             "${opers[1]}") _query;;
             "${opers[2]}") _install;;
-            "${opers[3]}") list_installed;;
-            "${opers[4]}") _delete;;
+            "${opers[3]}") _delete;;
+            "${opers[4]}") list_installed;;
         esac
         
         _draw "${opers[@]}"

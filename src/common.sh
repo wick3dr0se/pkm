@@ -8,9 +8,7 @@ init_term() {
     printf '\e[?1049h\e[?7l\e[?25l'
 }
 
-deinit_term() {
-    printf '\e[?1049l\e[?7h\e[?25h'
-}
+deinit_term() { printf '\e[?1049l\e[?7h\e[?25h'; }
 
 read_keys() { read -rsn1; [[ $REPLY == $'\e' ]] && read -rsn2; }
 
