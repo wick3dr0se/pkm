@@ -24,7 +24,8 @@ hover_interface() {
     local -n foo=$1
     local fooInit=("$@") fooCnt="${#foo[@]}"
     
-    printf '\e[%dH\e[30;42m%s\e[m' "$cursor" "${foo[cursor-LINES]%%?[:-]*}"
+    : "${foo[cursor-LINES]%% - *}"
+    printf '\e[%dH\e[30;42m%s\e[m' "$cursor" "${_%%: *}"
     
     cursorHist+=("$cursor")
     if (( ${i:=0} )); then

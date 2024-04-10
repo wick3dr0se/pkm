@@ -99,7 +99,9 @@ _query() {
 }
 
 _update() {
-    _pacman -Syu '' 1
+    sudo pacman -Syu
+
+    printf '\e[?25l'
 
     for((;;)) {
         _ibar '[*] continue' ''; read -rn1
