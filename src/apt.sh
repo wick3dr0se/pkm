@@ -4,9 +4,9 @@ _apt() {
     printf '\e[2J\e[H\e[?25h'
 
     if (( $3 )); then
-        sudo apt"$1" "$2"
+        sudo apt "$1" "$2"
     else
-        apt"$1" "$2"
+        apt "$1" "$2"
     fi
 
     printf '\e[?25l'
@@ -38,15 +38,15 @@ list_installed() {
 
 _delete() {
     [[ $1 ]]|| _ibar 'Delete: ' pkg
-    _pacman '-get purge' "${1:-$pkg}" 1
+    _apt purge "${1:-$pkg}" 1
     base_keymap
 }
 
 _install() {
     local pkg
 
-    [[ $1 ]]|| _ibar 'Install: ' pkg
-    _apt '-get install' "${1:-$pkg}" 1
+    [[ $1 ]] || _ibar 'Install: ' pkg
+    _apt install "${1:-$pkg}" 1
     base_keymap
     _draw "${queries[@]-}"
 }
@@ -56,7 +56,7 @@ _info() {
     local pkg
 
     [[ $1 ]] || _ibar 'Info: ' pkg
-    _pacman '-cache show' "${1:-$pkg}"
+    _apt show "${1:-$pkg}"
     base_keymap
 }
 
@@ -75,12 +75,12 @@ _query() {
 
     for((;;)) {
         _ibar '[<] back [>] delete'
-        hover_interface installed "${queriesInit[@]}"
+        hover_interface queries "${queriesInit[@]}"
 
         case $REPLY in
             '[D'|[hHaA]) return 1;;
             ''|'[C'|[lLdD])
-                _delete "${queries[cursor-LINES]}"
+                _delete "${queries[cursor-LINES]%% -*}"
                 _draw "${queries[@]}"
             ;;
         esac
@@ -88,8 +88,11 @@ _query() {
 }
 
 _update() {
-    _apt '' autoremove 1
-    for _ in clean update upgrade; do apt "$_"; done
+    printf '\e[?25h'
+
+    for _ in autoremove clean update upgrade; do sudo apt "$_"; done
+
+    printf '\e[?25l'
 
     for((;;)) {
         _ibar '[*] continue' ''; read -rn1

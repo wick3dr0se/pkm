@@ -24,7 +24,7 @@ hover_interface() {
     local -n foo=$1
     local fooInit=("$@") fooCnt="${#foo[@]}"
     
-    printf '\e[%dH\e[30;42m%s\e[m' "$cursor" "${foo[cursor-LINES]%:*}"
+    printf '\e[%dH\e[30;42m%s\e[m' "$cursor" "${foo[cursor-LINES]%%?[:-]*}"
     
     cursorHist+=("$cursor")
     if (( ${i:=0} )); then
@@ -42,7 +42,7 @@ hover_interface() {
     esac
 
     if (( ${#fooInit[@]} > rows )); then
-        (( cursor < LINES-fooCnt ))&& cursor="$rows"
+        (( cursor < LINES-fooCnt )) && cursor="$rows"
 
         if (( cursor > rows )); then
             fooInit=("${fooInit[@]:1}")
@@ -68,7 +68,7 @@ base_keymap() {
         _ibar '[<] back'
 
         read_keys
-        [[ $REPLY =~ ^'[D'$|^[hHaA]$ ]]&& return
+        [[ $REPLY =~ ^'[D'$|^[hHaA]$ ]] && return
     }
 }
 
