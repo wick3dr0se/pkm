@@ -9,6 +9,8 @@ if hash pacman; then
     . ./src/pacman.sh
 elif hash apt; then
     . ./src/apt.sh
+elif hash dnf; then
+    . ./src/dnf.sh
 fi
 
 opers=(
