@@ -55,7 +55,7 @@ _info() {
     local pkg
 
     [[ $1 ]] || _ibar 'Info: ' pkg
-    _dnf show -C "${1:-$pkg}"
+    dnf -C info "${1:-$pkg}"
     base_keymap
 }
 
@@ -89,7 +89,7 @@ _query() {
 _update() {
     printf '\e[?25h'
 
-    for _ in autoremove "clean packages" update upgrade; do sudo dnf "$_" --refresh; done
+    for _ in autoremove; do sudo dnf "$_" --refresh; done
 
     printf '\e[?25l'
 
