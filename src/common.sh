@@ -38,8 +38,8 @@ hover_interface() {
     read_keys
     case $REPLY in
         [qQ]) exit;;
-        '[B'|[kKwW]) ((cursor++));;
-        '[A'|[jJsS]) ((cursor--));;
+        '[B'|[kKsS]) ((cursor++));;
+        '[A'|[jJwW]) ((cursor--));;
     esac
 
     if (( ${#fooInit[@]} > rows )); then
