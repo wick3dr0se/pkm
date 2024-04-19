@@ -15,7 +15,11 @@ _zypper() {
 list_installed() {
     local installed installedInit
     
+<<<<<<< Updated upstream
     mapfile -t installed < <(zypper search -i)
+=======
+    mapfile -t installed < <(zypper search -i | awk '{print $3}')
+>>>>>>> Stashed changes
     installedInit=("${installed[@]}")
     
     printf '\e[2J'
