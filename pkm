@@ -11,6 +11,8 @@ elif hash apt; then
     . ./src/apt.sh
 elif hash dnf; then
     . ./src/dnf.sh
+elif hash zypper; then
+    . ./src/zypper.sh
 fi
 
 opers=(
