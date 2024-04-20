@@ -3,7 +3,9 @@
 _dnf() {
     printf '\e[2J\e[H\e[?25h'
 
-    if (( $3 )); then
+    if [ "$2" == "info" ]; then
+        sudo dnf "$1" "$2" "$3"
+    elif (( $3 )); then
         sudo dnf "$1" "$2"
     else
         dnf "$1" "$2"
@@ -53,9 +55,8 @@ _install() {
 
 _info() {
     local pkg
-
     [[ $1 ]] || _ibar 'Info: ' pkg
-    dnf -C info "${1:-$pkg}"
+    _dnf -C info "${1:-$pkg}"
     base_keymap
 }
 
