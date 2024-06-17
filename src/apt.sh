@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 _apt() {
     printf '\e[2J\e[H\e[?25h'
